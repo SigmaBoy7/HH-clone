@@ -18,7 +18,10 @@
                         <button>Помошь</button>
                     </li>
                     <li class="hidden sm:block">
-                        <button>Поиск</button>
+                        <button 
+                        @click="$router.push({path: '/search'})"
+                        >Поиск
+                    </button>
                     </li>
                     <li class="hidden sm:block">
                         <button>Создать резюме</button>
