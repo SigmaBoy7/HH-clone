@@ -4,8 +4,9 @@
             <div class="font-bold text-3xl text-gray-700">
                 Мои резюме
             </div>
-            <div class="inline-block py-1 px-3 border-2 hover:bg-gray-100">
+            <div class="inline-block">
                 <button
+                class="py-1 px-3 border-2 hover:bg-gray-100"
                 @click="$router.push({path: '/resume/create'})"
                 >
                     Создать резюме

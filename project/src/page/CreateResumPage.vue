@@ -4,8 +4,11 @@
             <create-page-popup
             ref="popup"
             v-if="isPopUpVisible"
-            @close="closePopUp()"
-            @clickOutside="closePopUp()"
+            :data="popupData"
+            @popupCreate="getJobsName"
+            @close="closePopUp"
+            @clickOutside="closePopUp"
+            @jobSelected="(n) => writeSelectedJob(n)"
             >
                 <template
                 v-slot:popup-title
@@ -31,12 +34,15 @@
                     <span class="text-xl font-bold mb-5">Профессия</span>
                     <app-input
                     class=""
+                    :inputValue="selectedJobName"
+                    :chipsData="chipsData"
+                    @chipsIsActive="(q) => getChipsData(q)"
                     />
                     <div class="flex flex-wrap mt-3">
                         <button
                         v-for="item in exampleJobName"
                         :key="item.id"
-                        @click="showPopUp"
+                        @click="showPopUp(item.job)"
                         class="px-2 py-1 m-1 border-2 rounded-2xl hover:border-black"
                         >
                             {{ item.job }}
@@ -51,22 +57,51 @@
 <script setup>
     import CreatePagePopup from "@/components/popup/CreatePagePopup"
     import { getExampleJobsName } from '@/helpers/db-api'
-    import { onMounted, ref } from 'vue';
+    import { onMounted, ref, watch } from 'vue';
+    import { getJobByCommonName } from '@/helpers/db-api'
+    import { getJobByQ } from '@/helpers/db-api'
 
     let exampleJobName = ref(null)
     let isPopUpVisible = ref(false)
+    let popupData = ref(null)
+    let selectedJobName = ref(null)
+    let selectedCommonJobName = ref(null)
+    let chipsData = ref(null)
     const popup = ref(null)
 
-    const showPopUp = () => {
+
+    const getJobsName = async() => {
+        const data = await getJobByCommonName(selectedCommonJobName.value)
+        popupData.value  = data.associatedNames
+    }
+
+    const showPopUp = (job) => {
+        selectedCommonJobName.value = job
         isPopUpVisible.value = true
     }
     const closePopUp = () => {
+        popupData = ref(null)
+        selectedCommonJobName = ref(null)
         isPopUpVisible.value = false
+    }
 
+    const writeSelectedJob = (job) => {
+        selectedJobName.value = job
+        closePopUp()
+    }
+
+    const getChipsData = async(q) => {
+        const data = await getJobByQ(q)
+        console.log(data)
+        chipsData.value = data
     }
 
     onMounted(async () => {
         exampleJobName.value = await getExampleJobsName()
+    })
+
+    watch( () => selectedCommonJobName.value, () => {
+        getJobsName()
     })
 
 </script>
@@ -82,7 +117,7 @@
 
     .slide-fade-enter-from,
     .slide-fade-leave-to {
-        transform: translateY(500px);
+        transform: translateZ(500px);
         opacity: 0;
     }
 </style>
